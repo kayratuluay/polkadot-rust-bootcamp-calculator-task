@@ -7,6 +7,7 @@ enum Operation {
     Divide(f64, f64),
 }
 
+// This function calculates matching Operation enum
 fn calculate(operation: Operation) -> f64 {
     match operation {
         Operation::Add(first_number, second_number) => return first_number + second_number,
@@ -16,6 +17,7 @@ fn calculate(operation: Operation) -> f64 {
     }
 }
 
+// This function splits user input word by word and returns a String type vector.
 fn input_parser(string: String) -> Vec<String> {
     let modified_string = string.as_str().to_owned() + " ";
     let mut result = Vec::new();
@@ -37,43 +39,71 @@ fn input_parser(string: String) -> Vec<String> {
     return result;
 }
 
-
 fn main() {
-    
     println!("Welcome to the CALCULATOR!");
-    println!("Please enter an operation. example: 5 + 2");
-    let mut user_input = String::new();
 
-    match io::stdin().read_line(&mut user_input) {
-        Ok(n) => {
-            println!("{} bytes read.", n);
-            println!("{}", user_input);
-        },
-        Err(error) => println!("An error has been occured. {}", error)
-    }
-    
-    let expression = input_parser(user_input);
+    // A loop that provides user can calculate how many times user would like
+    loop {
+        println!("Please enter an operation. example: 5 + 2 | OPERATORS : [ + - / * x ] | To quit the program, enter \"exit\" or \"quit\"");
+        let mut user_input = String::new();
 
-    let first_number: f64 = expression[0].parse().unwrap();
-    let operator: &str = &*expression[1];
-    let second_number: f64 = expression[2].parse().unwrap();
-
-    let mut resut_of_operation: f64 = 0.0;
-
-    match operator {
-        "+" => resut_of_operation = calculate(Operation::Add(first_number, second_number)),
-        "-" => resut_of_operation = calculate(Operation::Subtract(first_number, second_number)),
-        "*" | "x" => resut_of_operation = calculate(Operation::Multiply(first_number, second_number)),
-        "/" => {
-            if second_number > 0.0 {
-                resut_of_operation = calculate(Operation::Divide(first_number, second_number));
-            } else {
-                println!("{} can not be divided by 0!", first_number);
+        match io::stdin().read_line(&mut user_input) {
+            Ok(n) => {
+                println!("{} bytes read.", n);
             }
-        },
-        _ => println!("Please enter a expression by suggested method. example: 5 + 2")
+            Err(error) => panic!("An error has been occured. {}", error),
+        }
+
+        let expression = input_parser(user_input);
+        
+        // User quits the program if the input is "exit" or "quit"
+        if (&*expression[0] == "exit" || &*expression[0] == "quit") && expression.len() == 1{
+            println!("Goodbye.");
+            break;
+        }
+        
+        // If user enters a diffrent input from numbers, program sends a warning message to user
+        let first_number:f64 = match expression[0].parse::<f64>() {
+            Ok(number) => number,
+            Err(_e) => {
+                println!("Please enter a viable number.");
+                continue;
+            }
+        };
+
+        let operator: &str = &*expression[1];
+
+        let second_number: f64 = match expression[2].parse::<f64>() {
+            Ok(number) => number,
+            Err(_e) => {
+                println!("Please enter a viable number.");
+                continue;
+            }
+        };
+
+        let mut resut_of_operation: f64 = 0.0;
+
+        // The program calculates according to matching operator from user input
+        match operator {
+            "+" => resut_of_operation = calculate(Operation::Add(first_number, second_number)),
+            "-" => resut_of_operation = calculate(Operation::Subtract(first_number, second_number)),
+            "*" | "x" | "X" => {
+                resut_of_operation = calculate(Operation::Multiply(first_number, second_number))
+            }
+            // If the dividing number is zero, the program send a warning message to user that numbers can't divided by zero
+            "/" => {
+                if second_number > 0.0 {
+                    resut_of_operation = calculate(Operation::Divide(first_number, second_number));
+                } else {
+                    println!("{} can not be divided by 0!", first_number);
+                }
+            }
+            _ => {
+                println!("Please enter a expression by suggested method. example: 5 + 2");
+                continue;
+            },
+        }
+
+        println!("The result is {}", resut_of_operation);
     }
-
-    println!("The result is {}", resut_of_operation);
-
 }
